@@ -6,7 +6,9 @@ compatibility: Python 3.9+ · requests · network access to Nextcloud instance
 metadata:
   {
     "openclaw": {
-      "emoji": "☁️"
+      "emoji": "☁️",
+      "requires": { "env": ["NC_URL", "NC_USER", "NC_PASS"] },
+      "primaryEnv": "NC_PASS"
     }
   }
 ontology:

@@ -15,6 +15,15 @@ from pathlib import Path
 sys.path.insert(0, str(Path(__file__).resolve().parent))
 from nextcloud import NextcloudClient, NextcloudError, PermissionDeniedError
 
+
+def _init_force_delete(nc: NextcloudClient, path: str) -> bool:
+    """Force-delete a WebDAV path bypassing config restrictions.
+    Init-only cleanup helper — not part of the NextcloudClient public API.
+    Used exclusively to remove test artifacts created during this init run.
+    """
+    r = nc._session.delete(nc._dav(path))
+    return r.status_code in (204, 404)
+
 SKILL_DIR   = Path(__file__).resolve().parent.parent
 CONFIG_FILE = SKILL_DIR / "config.json"
 CREDS_FILE  = Path.home() / ".openclaw" / "secrets" / "nextcloud_creds"
@@ -251,7 +260,7 @@ def main():
     leftover = []
     for path in [test_file, test_dir]:
         if nc.exists(path):
-            if not nc._force_delete(path):
+            if not _init_force_delete(nc, path):
                 leftover.append(path)
     if leftover:
         print(f"\n  ℹ  Test folder left in Nextcloud (delete disabled on server):")

@@ -223,11 +223,6 @@ class NextcloudClient:
         r = self._session.request("HEAD", self._dav(path))
         return r.status_code == 200
 
-    def _force_delete(self, path: str) -> bool:
-        """Delete bypassing config restrictions — internal use only (init/cleanup)."""
-        r = self._session.delete(self._dav(path))
-        return r.status_code in (204, 404)
-
     def set_favorite(self, path: str, state: bool = True) -> bool:
         """Toggle favorite flag via PROPPATCH (oc:favorite)."""
         self._enforce_base(path)
