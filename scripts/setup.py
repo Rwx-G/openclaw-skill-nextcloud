@@ -14,6 +14,25 @@ SKILL_DIR   = Path(__file__).resolve().parent.parent
 CONFIG_FILE = SKILL_DIR / "config.json"
 CREDS_FILE  = Path.home() / ".openclaw" / "secrets" / "nextcloud_creds"
 
+# ─── Dependency check ─────────────────────────────────────────────────────────
+
+def _ensure_requests():
+    try:
+        import requests  # noqa: F401
+    except ImportError:
+        print("✗ Missing dependency: 'requests' is not installed.")
+        print("  Install it with:  pip install requests")
+        ans = input("  Install now? [Y/n] ").strip().lower()
+        if ans in ("", "y", "yes"):
+            import subprocess
+            subprocess.check_call([sys.executable, "-m", "pip", "install", "requests"])
+            print("  ✓ requests installed.\n")
+        else:
+            print("  Aborted. Install requests and re-run setup.py.")
+            sys.exit(1)
+
+_ensure_requests()
+
 _DEFAULT_CONFIG = {
     "base_path": "/",
     "allow_delete": True,

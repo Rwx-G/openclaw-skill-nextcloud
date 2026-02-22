@@ -7,8 +7,6 @@ All test artifacts are cleaned up automatically.
 Usage: python3 scripts/init.py
 """
 
-import datetime
-import json
 import sys
 from pathlib import Path
 
@@ -27,7 +25,6 @@ def _init_force_delete(nc: NextcloudClient, path: str) -> bool:
 SKILL_DIR   = Path(__file__).resolve().parent.parent
 CONFIG_FILE = SKILL_DIR / "config.json"
 CREDS_FILE  = Path.home() / ".openclaw" / "secrets" / "nextcloud_creds"
-LOG_DIR     = SKILL_DIR / ".skill-logs"
 
 TEST_DIR  = "__skill_test__"
 TEST_FILE = f"{TEST_DIR}/test.txt"
@@ -39,31 +36,19 @@ class Results:
         self.passed  = []
         self.failed  = []
         self.skipped = []
-        self._entries = []
-
-    def _record(self, status: str, label: str, detail: str = ""):
-        self._entries.append({
-            "ts":     datetime.datetime.now(datetime.timezone.utc).isoformat(),
-            "status": status,
-            "check":  label,
-            "detail": detail,
-        })
 
     def ok(self, label: str, detail: str = ""):
         self.passed.append(label)
-        self._record("pass", label, detail)
         suffix = f"  {detail}" if detail else ""
         print(f"  ✓  {label}{suffix}")
 
     def fail(self, label: str, reason: str = ""):
         self.failed.append(label)
-        self._record("fail", label, reason)
         suffix = f"  → {reason}" if reason else ""
         print(f"  ✗  {label}{suffix}")
 
     def skip(self, label: str, reason: str = ""):
         self.skipped.append(label)
-        self._record("skip", label, reason)
         print(f"  ~  {label}  (skipped: {reason})")
 
     def summary(self):
@@ -77,25 +62,6 @@ class Results:
             print("\n  Failed checks:")
             for f in self.failed:
                 print(f"    ✗  {f}")
-
-    def write_log(self):
-        """Append structured results to .skill-logs/init.jsonl"""
-        try:
-            LOG_DIR.mkdir(parents=True, exist_ok=True)
-            log_file = LOG_DIR / "init.jsonl"
-            run_entry = {
-                "ts":      datetime.datetime.now(datetime.timezone.utc).isoformat(),
-                "skill":   "nextcloud",
-                "passed":  len(self.passed),
-                "failed":  len(self.failed),
-                "skipped": len(self.skipped),
-                "checks":  self._entries,
-            }
-            with log_file.open("a") as f:
-                f.write(json.dumps(run_entry) + "\n")
-            print(f"\n  Log written → {log_file}")
-        except Exception as e:
-            print(f"\n  (Log write failed: {e})")
 
 
 def _prefixed(path: str, base: str) -> str:
@@ -282,8 +248,6 @@ def main():
     print("│   Init check complete                   │")
     print("└─────────────────────────────────────────┘")
     r.summary()
-
-    r.write_log()
 
     if r.failed:
         print("\n  Review config.json and nextcloud_creds, then re-run setup.py.\n")
