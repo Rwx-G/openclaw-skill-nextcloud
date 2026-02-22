@@ -201,12 +201,17 @@ def main():
             r.fail("Share (create)", str(e))
 
         if share_id:
-            try:
-                nc.delete_share(share_id)
-                share_id = None
-                r.ok("Share (delete)")
-            except Exception as e:
-                r.fail("Share (delete)", str(e))
+            if not cfg.get("allow_delete", True):
+                # When allow_delete=false the server may also deny OCS share deletion
+                # for non-owner contexts (Nextcloud 33+). Skip gracefully.
+                r.skip("Share (delete)", "allow_delete=false → skipping (server may deny)")
+            else:
+                try:
+                    nc.delete_share(share_id)
+                    share_id = None
+                    r.ok("Share (delete)")
+                except Exception as e:
+                    r.fail("Share (delete)", str(e))
 
     # ── 6. Delete ──────────────────────────────────────────────────────────────
     print("\n● Delete permissions\n")
@@ -235,6 +240,14 @@ def main():
     # ── Cleanup: best-effort delete of test artifacts ─────────────────────────
     # If allow_delete=false AND the NC server enforces it (403), we can't clean
     # up programmatically — expected behaviour, not a bug.
+
+    # Clean up dangling share link (best-effort; OCS delete, not WebDAV)
+    if share_id is not None:
+        try:
+            nc.delete_share(share_id)
+        except Exception:
+            pass  # non-fatal; share links expire naturally
+
     leftover = []
     for path in [test_file, test_dir]:
         if nc.exists(path):
