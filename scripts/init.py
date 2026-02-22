@@ -14,14 +14,6 @@ sys.path.insert(0, str(Path(__file__).resolve().parent))
 from nextcloud import NextcloudClient, NextcloudError, PermissionDeniedError
 
 
-def _init_force_delete(nc: NextcloudClient, path: str) -> bool:
-    """Force-delete a WebDAV path bypassing config restrictions.
-    Init-only cleanup helper — not part of the NextcloudClient public API.
-    Used exclusively to remove test artifacts created during this init run.
-    """
-    r = nc._session.delete(nc._dav(path))
-    return r.status_code in (204, 404)
-
 SKILL_DIR   = Path(__file__).resolve().parent.parent
 CONFIG_FILE = SKILL_DIR / "config.json"
 CREDS_FILE  = Path.home() / ".openclaw" / "secrets" / "nextcloud_creds"
@@ -212,10 +204,7 @@ def main():
             except Exception as e:
                 r.fail("Delete (folder)", str(e))
 
-    # ── Cleanup: best-effort delete of test artifacts ─────────────────────────
-    # If allow_delete=false AND the NC server enforces it (403), we can't clean
-    # up programmatically — expected behaviour, not a bug.
-
+    # ── Cleanup: notify user of any leftover test artifacts ───────────────────
     # Clean up dangling share link (best-effort; OCS delete, not WebDAV)
     if share_id is not None:
         try:
@@ -223,16 +212,12 @@ def main():
         except Exception:
             pass  # non-fatal; share links expire naturally
 
-    leftover = []
-    for path in [test_file, test_dir]:
-        if nc.exists(path):
-            if not _init_force_delete(nc, path):
-                leftover.append(path)
+    leftover = [p for p in [test_file, test_dir] if nc.exists(p)]
     if leftover:
-        print(f"\n  ℹ  Test folder left in Nextcloud (delete disabled on server):")
+        print(f"\n  ℹ  Test artifacts left in Nextcloud (delete disabled in config):")
         for p in leftover:
             print(f"     {p}")
-        print(f"     → Delete manually: Nextcloud → Files → /Jarvis/__skill_test__/")
+        print(f"     → Delete manually: Nextcloud → Files → {base}/__skill_test__/")
 
     # ── 7. Server capabilities ─────────────────────────────────────────────────
     print("\n● Server\n")
