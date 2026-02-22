@@ -4,14 +4,14 @@
 
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](LICENSE)
 [![OpenClaw](https://img.shields.io/badge/OpenClaw-skill-blue)](https://openclaw.ai)
-[![ClawHub](https://img.shields.io/badge/ClawHub-nextcloud-green)](https://clawhub.ai/rwx-g/nextcloud)
+[![ClawHub](https://img.shields.io/badge/ClawHub-nextcloud--files-green)](https://clawhub.ai/Romain-Grosos/nextcloud-files)
 
 Full Nextcloud client for OpenClaw agents. Covers file/folder management (WebDAV) and sharing, tags, favorites, and user info (OCS). Includes interactive setup wizard, connection + permission validation, and a behavior restriction system via `config.json`.
 
 ## Install
 
 ```bash
-clawhub install nextcloud
+clawhub install nextcloud-files
 ```
 
 Or manually:
@@ -45,6 +45,14 @@ You'll need a Nextcloud **App Password**: Settings → Security → App password
 ## Configuration
 
 Credentials → `~/.openclaw/secrets/nextcloud_creds` (chmod 600, never committed)
+
+Required variables (set by `setup.py` or manually):
+
+```
+NC_URL=https://your-nextcloud.com
+NC_USER=your_username
+NC_PASS=your_app_password
+```
 
 Behavior → `config.json` in skill directory:
 
