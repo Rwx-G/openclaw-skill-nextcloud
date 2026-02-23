@@ -85,7 +85,7 @@ def main():
     base         = cfg.get("base_path", "/").rstrip("/") or ""
     ro           = cfg.get("readonly_mode", False)
     allow_write  = cfg.get("allow_write",  True)
-    allow_delete = cfg.get("allow_delete", True)
+    allow_delete = cfg.get("allow_delete", False)
     allow_share  = cfg.get("allow_share",  True)
 
     # Write tests require both allow_write and allow_delete to guarantee cleanup.

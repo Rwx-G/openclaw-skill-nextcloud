@@ -71,6 +71,8 @@ Behavior → `config.json` in skill directory:
 }
 ```
 
+> **Safe defaults:** `allow_delete` is `false` by default. Enable it explicitly only if the agent needs to remove files. Start with `allow_write: true` and `allow_delete: false` for a write-only setup that cannot accidentally erase data.
+
 ## Requirements
 
 - Python 3.9+

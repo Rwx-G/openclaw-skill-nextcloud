@@ -24,9 +24,9 @@ CREDS_FILE  = Path.home() / ".openclaw" / "secrets" / "nextcloud_creds"
 
 _DEFAULT_CONFIG = {
     "base_path": "/",
-    "allow_delete": True,
-    "allow_share": True,
     "allow_write": True,
+    "allow_delete": False,
+    "allow_share": True,
     "readonly_mode": False,
     "share_default_permissions": 1,
     "share_default_expire_days": None,
@@ -127,7 +127,7 @@ class NextcloudClient:
     def _check_delete(self):
         if self.cfg.get("readonly_mode"):
             raise PermissionDeniedError("readonly_mode is enabled in config.json")
-        if not self.cfg.get("allow_delete", True):
+        if not self.cfg.get("allow_delete", False):
             raise PermissionDeniedError("allow_delete is disabled in config.json")
 
     def _check_share(self):

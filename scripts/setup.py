@@ -31,9 +31,9 @@ _ensure_requests()
 
 _DEFAULT_CONFIG = {
     "base_path": "/",
-    "allow_delete": True,
-    "allow_share": True,
     "allow_write": True,
+    "allow_delete": False,
+    "allow_share": True,
     "readonly_mode": False,
     "share_default_permissions": 1,
     "share_default_expire_days": None,
@@ -175,8 +175,8 @@ def main():
     )
     cfg["allow_delete"] = _ask_bool(
         "Allow deleting files and folders?",
-        default=cfg.get("allow_delete", True),
-        hint="delete",
+        default=cfg.get("allow_delete", False),
+        hint="recommended: false unless you trust the agent fully",
     )
 
     print("\n  ── Sharing ──")

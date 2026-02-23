@@ -67,11 +67,13 @@ App password: Nextcloud → Settings → Security → App passwords.
 |-----|---------|--------|
 | `base_path` | `"/"` | Restrict agent to subtree (e.g. `"/Jarvis"`) |
 | `allow_write` | `true` | mkdir, write, rename, copy |
-| `allow_delete` | `true` | delete files and folders |
+| `allow_delete` | `false` | delete files and folders (recommended: keep false) |
 | `allow_share` | `true` | create/manage share links |
 | `readonly_mode` | `false` | override: block all writes |
 | `share_default_permissions` | `1` | 1=read-only, 31=full |
 | `share_default_expire_days` | `null` | auto-expire shares (days) |
+
+> **Safe defaults:** `allow_delete` is `false` by default — enable explicitly only when needed. Combine with a restricted `base_path` (e.g. `"/Jarvis"`) to limit the agent's scope.
 
 ## Module usage
 
