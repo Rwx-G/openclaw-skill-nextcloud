@@ -24,11 +24,14 @@ git clone https://github.com/rwx-g/openclaw-skill-nextcloud \
 ## Setup
 
 ```bash
-python3 scripts/setup.py   # credentials + permissions + connection test
-python3 scripts/init.py    # validate all configured permissions
+pip install requests           # install dependency first
+python3 scripts/setup.py       # credentials + permissions + connection test
+python3 scripts/init.py        # validate all configured permissions
 ```
 
 You'll need a Nextcloud **App Password**: Settings → Security → App passwords.
+
+> init.py only runs write/delete tests when both `allow_write=true` and `allow_delete=true`. When `allow_delete=false`, write tests are skipped — no artifacts are created and none can be left on your instance.
 
 ## What it can do
 
@@ -71,8 +74,10 @@ Behavior → `config.json` in skill directory:
 ## Requirements
 
 - Python 3.9+
-- `requests` (`pip install requests`)
+- `requests` — install with `pip install requests` before running setup.py
 - Network access to Nextcloud instance
+
+> **Note:** setup.py does not run `pip` automatically. Install dependencies manually before setup.
 
 ## Documentation
 

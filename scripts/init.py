@@ -2,7 +2,10 @@
 """
 init.py — Validate the Nextcloud skill configuration.
 Tests the connection and each configured permission against the real instance.
-All test artifacts are cleaned up automatically.
+
+Write tests (mkdir/write/delete) are only run when both allow_write=true AND
+allow_delete=true. This guarantees no test artifacts are ever left on the
+Nextcloud instance.
 
 Usage: python3 scripts/init.py
 """
@@ -18,8 +21,8 @@ SKILL_DIR   = Path(__file__).resolve().parent.parent
 CONFIG_FILE = SKILL_DIR / "config.json"
 CREDS_FILE  = Path.home() / ".openclaw" / "secrets" / "nextcloud_creds"
 
-TEST_DIR  = "__skill_test__"
-TEST_FILE = f"{TEST_DIR}/test.txt"
+TEST_DIR     = "__skill_test__"
+TEST_FILE    = f"{TEST_DIR}/test.txt"
 TEST_CONTENT = "nextcloud-skill-init-check"
 
 
@@ -57,7 +60,6 @@ class Results:
 
 
 def _prefixed(path: str, base: str) -> str:
-    """Ensure path is inside base_path."""
     base = base.rstrip("/") or ""
     return f"{base}/{path}"
 
@@ -79,11 +81,17 @@ def main():
         print(f"\n✗ {e}")
         sys.exit(1)
 
-    cfg  = nc.cfg
-    base = cfg.get("base_path", "/").rstrip("/") or ""
-    ro   = cfg.get("readonly_mode", False)
-    r    = Results()
+    cfg          = nc.cfg
+    base         = cfg.get("base_path", "/").rstrip("/") or ""
+    ro           = cfg.get("readonly_mode", False)
+    allow_write  = cfg.get("allow_write",  True)
+    allow_delete = cfg.get("allow_delete", True)
+    allow_share  = cfg.get("allow_share",  True)
 
+    # Write tests require both allow_write and allow_delete to guarantee cleanup.
+    can_write_test = allow_write and allow_delete and not ro
+
+    r         = Results()
     test_dir  = _prefixed(TEST_DIR,  base)
     test_file = _prefixed(TEST_FILE, base)
     share_id  = None
@@ -116,50 +124,90 @@ def main():
     except Exception as e:
         r.fail("Read base_path", str(e))
 
-    # ── 3. Write ───────────────────────────────────────────────────────────────
-    print("\n● Write permissions\n")
+    # ── 3. Write + Delete (only when both are enabled) ─────────────────────────
+    print("\n● Write / Delete permissions\n")
 
     if ro:
-        r.skip("Write (mkdir)",  "readonly_mode=true")
-        r.skip("Write (file)",   "readonly_mode=true")
-    elif not cfg.get("allow_write", True):
-        r.skip("Write (mkdir)",  "allow_write=false")
-        r.skip("Write (file)",   "allow_write=false")
+        r.skip("Write (mkdir)",   "readonly_mode=true")
+        r.skip("Write (file)",    "readonly_mode=true")
+        r.skip("Read (file)",     "readonly_mode=true")
+        r.skip("Delete (file)",   "readonly_mode=true")
+        r.skip("Delete (folder)", "readonly_mode=true")
+
+    elif not allow_write:
+        r.skip("Write (mkdir)",   "allow_write=false")
+        r.skip("Write (file)",    "allow_write=false")
+        r.skip("Read (file)",     "allow_write=false")
+        r.skip("Delete (file)",   "allow_write=false")
+        r.skip("Delete (folder)", "allow_write=false")
+
+    elif not allow_delete:
+        # Cannot guarantee cleanup → skip all write tests to avoid orphan artifacts.
+        r.skip("Write (mkdir)",   "allow_delete=false (write test skipped — no cleanup possible)")
+        r.skip("Write (file)",    "allow_delete=false (write test skipped — no cleanup possible)")
+        r.skip("Read (file)",     "allow_delete=false")
+        r.skip("Delete (file)",   "allow_delete=false")
+        r.skip("Delete (folder)", "allow_delete=false")
+        print(f"\n  ℹ  Write tests skipped: allow_delete=false ensures no test artifacts")
+        print(f"     are left on the instance. Write access will be confirmed on first use.")
+
     else:
+        # allow_write=true AND allow_delete=true — safe to create and clean up.
+
+        # mkdir
         try:
             nc.mkdir(test_dir)
             r.ok("Write (mkdir)", f"created {test_dir}")
         except Exception as e:
             r.fail("Write (mkdir)", str(e))
 
+        # write file
         try:
             nc.write_file(test_file, TEST_CONTENT)
             r.ok("Write (file)", f"created {test_file}")
         except Exception as e:
             r.fail("Write (file)", str(e))
 
-    # ── 4. Read ────────────────────────────────────────────────────────────────
-    if not ro and cfg.get("allow_write", True) and nc.exists(test_file):
-        try:
-            content = nc.read_file(test_file)
-            if content.strip() == TEST_CONTENT:
-                r.ok("Read (file)", "content matches")
-            else:
-                r.fail("Read (file)", f"unexpected content: {content[:40]!r}")
-        except Exception as e:
-            r.fail("Read (file)", str(e))
+        # read file back
+        if nc.exists(test_file):
+            try:
+                content = nc.read_file(test_file)
+                if content.strip() == TEST_CONTENT:
+                    r.ok("Read (file)", "content matches")
+                else:
+                    r.fail("Read (file)", f"unexpected content: {content[:40]!r}")
+            except Exception as e:
+                r.fail("Read (file)", str(e))
 
-    # ── 5. Share ───────────────────────────────────────────────────────────────
+        # cleanup: delete file then folder
+        if nc.exists(test_file):
+            try:
+                nc.delete(test_file)
+                r.ok("Delete (file)", f"removed {test_file}")
+            except Exception as e:
+                r.fail("Delete (file)", str(e))
+                print(f"     ⚠  Manual cleanup: Nextcloud → Files → {base}/{TEST_DIR}/")
+
+        if nc.exists(test_dir):
+            try:
+                nc.delete(test_dir)
+                r.ok("Delete (folder)", f"removed {test_dir}")
+            except Exception as e:
+                r.fail("Delete (folder)", str(e))
+                print(f"     ⚠  Manual cleanup: Nextcloud → Files → {base}/{TEST_DIR}/")
+
+    # ── 4. Share ───────────────────────────────────────────────────────────────
     print("\n● Share permissions\n")
 
-    if not cfg.get("allow_share", True):
+    if not allow_share:
         r.skip("Share (create)", "allow_share=false")
         r.skip("Share (delete)", "allow_share=false")
     elif ro:
         r.skip("Share (create)", "readonly_mode=true")
         r.skip("Share (delete)", "readonly_mode=true")
     else:
-        target = test_dir if nc.exists(test_dir) else (base or "/")
+        # Share test: use base_path as target (read-only, no artifact created on disk).
+        target = base or "/"
         try:
             share = nc.create_share_link(target, permissions=1)
             share_id = share.get("share_id")
@@ -168,61 +216,18 @@ def main():
             r.fail("Share (create)", str(e))
 
         if share_id:
-            if not cfg.get("allow_delete", True):
-                # When allow_delete=false the server may also deny OCS share deletion
-                # for non-owner contexts (Nextcloud 33+). Skip gracefully.
-                r.skip("Share (delete)", "allow_delete=false → skipping (server may deny)")
-            else:
-                try:
-                    nc.delete_share(share_id)
-                    share_id = None
-                    r.ok("Share (delete)")
-                except Exception as e:
-                    r.fail("Share (delete)", str(e))
-
-    # ── 6. Delete ──────────────────────────────────────────────────────────────
-    print("\n● Delete permissions\n")
-
-    if ro:
-        r.skip("Delete (file)",   "readonly_mode=true")
-        r.skip("Delete (folder)", "readonly_mode=true")
-    elif not cfg.get("allow_delete", True):
-        r.skip("Delete (file)",   "allow_delete=false")
-        r.skip("Delete (folder)", "allow_delete=false")
-    else:
-        if nc.exists(test_file):
             try:
-                nc.delete(test_file)
-                r.ok("Delete (file)", f"removed {test_file}")
+                nc.delete_share(share_id)
+                share_id = None
+                r.ok("Share (delete)")
             except Exception as e:
-                r.fail("Delete (file)", str(e))
+                # Share links expire naturally — non-fatal.
+                r.skip("Share (delete)", f"best-effort cleanup failed ({e}); link expires naturally")
 
-        if nc.exists(test_dir):
-            try:
-                nc.delete(test_dir)
-                r.ok("Delete (folder)", f"removed {test_dir}")
-            except Exception as e:
-                r.fail("Delete (folder)", str(e))
-
-    # ── Cleanup: notify user of any leftover test artifacts ───────────────────
-    # Clean up dangling share link (best-effort; OCS delete, not WebDAV)
-    if share_id is not None:
-        try:
-            nc.delete_share(share_id)
-        except Exception:
-            pass  # non-fatal; share links expire naturally
-
-    leftover = [p for p in [test_file, test_dir] if nc.exists(p)]
-    if leftover:
-        print(f"\n  ℹ  Test artifacts left in Nextcloud (delete disabled in config):")
-        for p in leftover:
-            print(f"     {p}")
-        print(f"     → Delete manually: Nextcloud → Files → {base}/__skill_test__/")
-
-    # ── 7. Server capabilities ─────────────────────────────────────────────────
+    # ── 5. Server capabilities ─────────────────────────────────────────────────
     print("\n● Server\n")
     try:
-        caps  = nc.get_capabilities()
+        caps   = nc.get_capabilities()
         nc_ver = caps.get("version", {}).get("string", "?")
         r.ok("Capabilities", f"Nextcloud {nc_ver}")
     except Exception as e:

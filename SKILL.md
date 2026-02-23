@@ -46,9 +46,12 @@ python3 scripts/nextcloud.py ls /      # list root directory
 ## Setup
 
 ```bash
-python3 scripts/setup.py   # interactive: credentials + permissions + connection test
-python3 scripts/init.py    # validate all configured permissions against live instance
+pip install requests           # install dependency first (setup.py does not run pip)
+python3 scripts/setup.py       # interactive: credentials + permissions + connection test
+python3 scripts/init.py        # validate all configured permissions against live instance
 ```
+
+> init.py only runs write/delete tests when both `allow_write=true` and `allow_delete=true`. When `allow_delete=false`, write tests are skipped — no test artifacts are created or left behind.
 
 **Manual** — `~/.openclaw/secrets/nextcloud_creds` (chmod 600):
 ```
