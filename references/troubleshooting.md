@@ -3,7 +3,7 @@
 ## Credentials missing
 
 ```
-NextcloudError: Credentials missing. Set NC_URL / NC_USER / NC_PASS in
+NextcloudError: Credentials missing. Set NC_URL / NC_USER / NC_APP_KEY in
 ~/.openclaw/secrets/nextcloud_creds or as environment variables.
 ```
 → Run `python3 scripts/setup.py` or create the file manually (see SKILL.md).

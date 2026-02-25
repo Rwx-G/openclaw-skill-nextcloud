@@ -7,8 +7,8 @@ metadata:
   {
     "openclaw": {
       "emoji": "☁️",
-      "requires": { "env": ["NC_URL", "NC_USER", "NC_PASS"] },
-      "primaryEnv": "NC_PASS"
+      "requires": { "env": ["NC_URL", "NC_USER", "NC_APP_KEY"] },
+      "primaryEnv": "NC_APP_KEY"
     }
   }
 ontology:
@@ -56,7 +56,7 @@ python3 scripts/init.py        # validate all configured permissions against liv
 ```
 NC_URL=https://cloud.example.com
 NC_USER=username
-NC_PASS=app-password
+NC_APP_KEY=app-password
 ```
 App password: Nextcloud → Settings → Security → App passwords.
 
@@ -78,10 +78,10 @@ The skill reads and writes the following paths. All usage is intentional and doc
 
 | Path | Written by | Purpose |
 |------|-----------|---------|
-| `~/.openclaw/secrets/nextcloud_creds` | `setup.py` | Nextcloud credentials (NC_URL, NC_USER, NC_PASS). chmod 600. Never committed. |
+| `~/.openclaw/secrets/nextcloud_creds` | `setup.py` | Nextcloud credentials (NC_URL, NC_USER, NC_APP_KEY). chmod 600. Never committed. |
 | `<skill_dir>/config.json` | `setup.py` | Behavior restrictions (base_path, allow_write, allow_delete, readonly_mode). No secrets. |
 
-Credentials can also be provided via environment variables (`NC_URL`, `NC_USER`, `NC_PASS`) instead of the creds file. The skill checks env vars first.
+Credentials can also be provided via environment variables (`NC_URL`, `NC_USER`, `NC_APP_KEY`) instead of the creds file. The skill checks env vars first.
 
 ## Module usage
 

@@ -55,7 +55,7 @@ Required variables (set by `setup.py` or manually):
 ```
 NC_URL=https://your-nextcloud.com
 NC_USER=your_username
-NC_PASS=your_app_password
+NC_APP_KEY=your_app_password
 ```
 
 Behavior → `config.json` in skill directory:

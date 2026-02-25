@@ -4,7 +4,7 @@ nextcloud.py - Nextcloud client (WebDAV + OCS) for OpenClaw
 Skill: nextcloud | https://clawhub.ai
 
 Config  : <skill_dir>/config.json
-Secrets : ~/.openclaw/secrets/nextcloud_creds  (NC_URL, NC_USER, NC_PASS)
+Secrets : ~/.openclaw/secrets/nextcloud_creds  (NC_URL, NC_USER, NC_APP_KEY)
 """
 
 import json
@@ -49,7 +49,7 @@ def _load_creds() -> dict:
             if line and not line.startswith("#") and "=" in line:
                 k, v = line.split("=", 1)
                 creds[k.strip()] = v.strip()
-    for k in ("NC_URL", "NC_USER", "NC_PASS"):
+    for k in ("NC_URL", "NC_USER", "NC_APP_KEY"):
         if k in os.environ:
             creds[k] = os.environ[k]
     return creds
@@ -77,10 +77,10 @@ class NextcloudClient:
         self.cfg = _load_config()
         self.base_url  = (url      or creds.get("NC_URL",  "")).rstrip("/")
         self.user      = (user     or creds.get("NC_USER", ""))
-        self.password  = (password or creds.get("NC_PASS", ""))
+        self.password  = (password or creds.get("NC_APP_KEY", ""))
         if not all([self.base_url, self.user, self.password]):
             raise NextcloudError(
-                "Credentials missing. Set NC_URL / NC_USER / NC_PASS in "
+                "Credentials missing. Set NC_URL / NC_USER / NC_APP_KEY in "
                 f"{CREDS_FILE} or as environment variables."
             )
         self.dav_root  = f"{self.base_url}/remote.php/dav/files/{quote(self.user)}"
@@ -467,7 +467,7 @@ def _cli():
     p = argparse.ArgumentParser(
         description="Nextcloud CLI - WebDAV + OCS",
         formatter_class=argparse.RawDescriptionHelpFormatter,
-        epilog="Credentials: ~/.openclaw/secrets/nextcloud_creds (NC_URL / NC_USER / NC_PASS)"
+        epilog="Credentials: ~/.openclaw/secrets/nextcloud_creds (NC_URL / NC_USER / NC_APP_KEY)"
     )
     sub = p.add_subparsers(dest="cmd", required=True)
 

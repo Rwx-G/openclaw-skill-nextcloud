@@ -85,7 +85,7 @@ def _load_existing_config() -> dict:
 
 def _write_creds(nc_url: str, nc_user: str, nc_pass: str):
     CREDS_FILE.parent.mkdir(parents=True, exist_ok=True)
-    CREDS_FILE.write_text(f"NC_URL={nc_url}\nNC_USER={nc_user}\nNC_PASS={nc_pass}\n")
+    CREDS_FILE.write_text(f"NC_URL={nc_url}\nNC_USER={nc_user}\nNC_APP_KEY={nc_pass}\n")
     CREDS_FILE.chmod(0o600)
 
 
@@ -124,7 +124,7 @@ def main():
         if not _ask_bool("Update credentials?", default=False):
             nc_url  = existing.get("NC_URL",  "")
             nc_user = existing.get("NC_USER", "")
-            nc_pass = existing.get("NC_PASS", "")
+            nc_pass = existing.get("NC_APP_KEY", "")
             print("  → Keeping existing credentials.")
         else:
             existing = {}
