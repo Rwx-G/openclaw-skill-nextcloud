@@ -58,7 +58,7 @@ NC_USER=your_username
 NC_APP_KEY=your_app_password
 ```
 
-Behavior → `config.json` in skill directory:
+Behavior → `config.json` in skill directory (not shipped, created by `setup.py`):
 
 ```json
 {
@@ -68,6 +68,8 @@ Behavior → `config.json` in skill directory:
   "readonly_mode": false
 }
 ```
+
+A `config.example.json` with safe defaults is included as reference. Copy it to `config.json` if you prefer not to run `setup.py`.
 
 > **Safe defaults:** both `allow_write` and `allow_delete` are `false` by default. Enable each explicitly only when needed. The skill operates read-only until you grant write access.
 

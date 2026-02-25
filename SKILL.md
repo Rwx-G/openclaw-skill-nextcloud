@@ -79,7 +79,7 @@ The skill reads and writes the following paths. All usage is intentional and doc
 | Path | Written by | Purpose |
 |------|-----------|---------|
 | `~/.openclaw/secrets/nextcloud_creds` | `setup.py` | Nextcloud credentials (NC_URL, NC_USER, NC_APP_KEY). chmod 600. Never committed. |
-| `<skill_dir>/config.json` | `setup.py` | Behavior restrictions (base_path, allow_write, allow_delete, readonly_mode). No secrets. |
+| `<skill_dir>/config.json` | `setup.py` | Behavior restrictions (base_path, allow_write, allow_delete, readonly_mode). No secrets. Not shipped - created by setup.py or copied from config.example.json. |
 
 Credentials can also be provided via environment variables (`NC_URL`, `NC_USER`, `NC_APP_KEY`) instead of the creds file. The skill checks env vars first.
 
