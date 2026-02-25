@@ -3,7 +3,7 @@
 nextcloud.py - Nextcloud client (WebDAV + OCS) for OpenClaw
 Skill: nextcloud | https://clawhub.ai
 
-Config  : <skill_dir>/config.json
+Config  : ~/.openclaw/config/nextcloud/config.json
 Secrets : ~/.openclaw/secrets/nextcloud_creds  (NC_URL, NC_USER, NC_APP_KEY)
 """
 
@@ -18,9 +18,10 @@ import requests
 
 # ─── Paths ─────────────────────────────────────────────────────────────────────
 
-SKILL_DIR   = Path(__file__).resolve().parent.parent   # skills/nextcloud/
-CONFIG_FILE = SKILL_DIR / "config.json"
-CREDS_FILE  = Path.home() / ".openclaw" / "secrets" / "nextcloud_creds"
+SKILL_DIR    = Path(__file__).resolve().parent.parent   # skills/nextcloud/
+_CONFIG_DIR  = Path.home() / ".openclaw" / "config" / "nextcloud"
+CONFIG_FILE  = _CONFIG_DIR / "config.json"
+CREDS_FILE   = Path.home() / ".openclaw" / "secrets" / "nextcloud_creds"
 
 _DEFAULT_CONFIG = {
     "base_path": "/",

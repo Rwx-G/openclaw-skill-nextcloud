@@ -13,7 +13,8 @@ from pathlib import Path
 # No subprocess usage in this file - pip installs must be done manually.
 
 SKILL_DIR   = Path(__file__).resolve().parent.parent
-CONFIG_FILE = SKILL_DIR / "config.json"
+_CONFIG_DIR = Path.home() / ".openclaw" / "config" / "nextcloud"
+CONFIG_FILE = _CONFIG_DIR / "config.json"
 CREDS_FILE  = Path.home() / ".openclaw" / "secrets" / "nextcloud_creds"
 
 # ─── Dependency check ─────────────────────────────────────────────────────────
@@ -90,6 +91,7 @@ def _write_creds(nc_url: str, nc_user: str, nc_pass: str):
 
 
 def _write_config(cfg: dict):
+    _CONFIG_DIR.mkdir(parents=True, exist_ok=True)
     CONFIG_FILE.write_text(json.dumps(cfg, indent=2, ensure_ascii=False) + "\n")
 
 

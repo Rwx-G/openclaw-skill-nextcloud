@@ -18,7 +18,8 @@ from nextcloud import NextcloudClient, NextcloudError, PermissionDeniedError
 
 
 SKILL_DIR   = Path(__file__).resolve().parent.parent
-CONFIG_FILE = SKILL_DIR / "config.json"
+_CONFIG_DIR = Path.home() / ".openclaw" / "config" / "nextcloud"
+CONFIG_FILE = _CONFIG_DIR / "config.json"
 CREDS_FILE  = Path.home() / ".openclaw" / "secrets" / "nextcloud_creds"
 
 TEST_DIR     = "__skill_test__"
