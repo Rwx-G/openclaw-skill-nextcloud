@@ -10,25 +10,14 @@ import json
 import sys
 from pathlib import Path
 
-# No subprocess usage in this file - pip installs must be done manually.
+import base64
+import urllib.request
+import urllib.error
 
 SKILL_DIR   = Path(__file__).resolve().parent.parent
 _CONFIG_DIR = Path.home() / ".openclaw" / "config" / "nextcloud"
 CONFIG_FILE = _CONFIG_DIR / "config.json"
 CREDS_FILE  = Path.home() / ".openclaw" / "secrets" / "nextcloud_creds"
-
-# ─── Dependency check ─────────────────────────────────────────────────────────
-
-def _ensure_requests():
-    try:
-        import requests  # noqa: F401
-    except ImportError:
-        print("✗ Missing dependency: 'requests' is not installed.")
-        print("  Install it with:  pip install requests")
-        print("  Then re-run:      python3 scripts/setup.py")
-        sys.exit(1)
-
-_ensure_requests()
 
 _DEFAULT_CONFIG = {
     "base_path": "/",
@@ -97,14 +86,18 @@ def _write_config(cfg: dict):
 
 def _test_connection(nc_url: str, nc_user: str, nc_pass: str) -> bool:
     try:
-        import requests
-        r = requests.get(
-            f"{nc_url.rstrip('/')}/ocs/v2.php/cloud/user",
-            auth=(nc_user, nc_pass),
-            headers={"OCS-APIRequest": "true", "Accept": "application/json"},
-            timeout=10,
-        )
-        return r.status_code == 200
+        url = f"{nc_url.rstrip('/')}/ocs/v2.php/cloud/user"
+        cred = base64.b64encode(f"{nc_user}:{nc_pass}".encode()).decode()
+        req = urllib.request.Request(url, headers={
+            "Authorization": f"Basic {cred}",
+            "OCS-APIRequest": "true",
+            "Accept": "application/json",
+        })
+        with urllib.request.urlopen(req, timeout=10) as resp:
+            return resp.status == 200
+    except urllib.error.HTTPError as exc:
+        print(f"    HTTP {exc.code}")
+        return False
     except Exception as e:
         print(f"    Connection error: {e}")
         return False

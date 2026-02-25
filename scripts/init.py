@@ -85,7 +85,7 @@ def main():
     cfg          = nc.cfg
     base         = cfg.get("base_path", "/").rstrip("/") or ""
     ro           = cfg.get("readonly_mode", False)
-    allow_write  = cfg.get("allow_write",  True)
+    allow_write  = cfg.get("allow_write",  False)
     allow_delete = cfg.get("allow_delete", False)
 
     # Write tests require both allow_write and allow_delete to guarantee cleanup.

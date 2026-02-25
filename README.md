@@ -26,7 +26,6 @@ git clone https://github.com/rwx-g/openclaw-skill-nextcloud \
 ## Setup
 
 ```bash
-pip install requests           # install dependency first
 python3 scripts/setup.py       # credentials + permissions + connection test
 python3 scripts/init.py        # validate all configured permissions
 ```
@@ -76,10 +75,8 @@ A `config.example.json` with safe defaults is included as reference. Copy it to 
 ## Requirements
 
 - Python 3.9+
-- `requests` - install with `pip install requests` before running setup.py
+- No external dependencies (stdlib only)
 - Network access to Nextcloud instance
-
-> **Note:** setup.py does not run `pip` automatically. Install dependencies manually before setup.
 
 ## Documentation
 

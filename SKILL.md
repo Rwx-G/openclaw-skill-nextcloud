@@ -2,7 +2,7 @@
 name: nextcloud
 description: "Nextcloud file and folder management via WebDAV + OCS API. Use when: (1) creating, reading, writing, renaming, moving, copying, or deleting files/folders, (2) listing or searching directory contents, (3) toggling favorites or managing system tags, (4) checking storage quota. NOT for: Nextcloud Talk, Calendar/Contacts (use CalDAV), app management (requires admin), large binary transfers, or creating share links (share capability not included by default - see README)."
 homepage: https://github.com/rwx-g/openclaw-skill-nextcloud
-compatibility: Python 3.9+ · requests · network access to Nextcloud instance
+compatibility: Python 3.9+ · no external dependencies · network access to Nextcloud instance
 metadata:
   {
     "openclaw": {
@@ -12,13 +12,13 @@ metadata:
     }
   }
 ontology:
-  reads: []
+  reads: [files, folders, user, quota, capabilities]
   writes: [files, folders, tags, favorites]
 ---
 
 # Nextcloud Skill
 
-Full Nextcloud client: WebDAV (files/folders) + OCS (sharing, tags, user info).
+Full Nextcloud client: WebDAV (files/folders) + OCS (tags, user info). Zero external dependencies - stdlib only (urllib).
 Credentials: `~/.openclaw/secrets/nextcloud_creds` · Config: `~/.openclaw/config/nextcloud/config.json`
 
 ## Trigger phrases
@@ -45,7 +45,6 @@ python3 scripts/nextcloud.py ls /      # list root directory
 ## Setup
 
 ```bash
-pip install requests           # install dependency first (setup.py does not run pip)
 python3 scripts/setup.py       # interactive: credentials + permissions + connection test
 python3 scripts/init.py        # validate all configured permissions against live instance
 ```
