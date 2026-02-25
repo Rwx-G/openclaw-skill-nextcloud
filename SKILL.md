@@ -1,6 +1,6 @@
 ---
 name: nextcloud
-description: "Nextcloud file and folder management via WebDAV + OCS API. Use when: (1) creating, reading, writing, renaming, moving, copying, or deleting files/folders, (2) listing or searching directory contents, (3) creating public or user share links, (4) toggling favorites or managing system tags, (5) checking storage quota. NOT for: Nextcloud Talk, Calendar/Contacts (use CalDAV), app management (requires admin), or large binary transfers."
+description: "Nextcloud file and folder management via WebDAV + OCS API. Use when: (1) creating, reading, writing, renaming, moving, copying, or deleting files/folders, (2) listing or searching directory contents, (3) toggling favorites or managing system tags, (4) checking storage quota. NOT for: Nextcloud Talk, Calendar/Contacts (use CalDAV), app management (requires admin), large binary transfers, or creating share links (share capability not included by default — see README)."
 homepage: https://github.com/rwx-g/openclaw-skill-nextcloud
 compatibility: Python 3.9+ · requests · network access to Nextcloud instance
 metadata:
@@ -13,7 +13,7 @@ metadata:
   }
 ontology:
   reads: []
-  writes: [files, folders, shares, tags, favorites]
+  writes: [files, folders, tags, favorites]
 ---
 
 # Nextcloud Skill
@@ -27,7 +27,6 @@ Load this skill immediately when the user says anything like:
 
 - "upload / save / write this file on Nextcloud / NC / cloud"
 - "create a folder on Nextcloud", "mkdir in NC"
-- "share this / create a share link / get a public link for [file or folder]"
 - "list / browse / show what's in [folder] on Nextcloud"
 - "search for [file] in NC", "find [file] on Nextcloud"
 - "read / get / download [file] from Nextcloud"
@@ -68,12 +67,10 @@ App password: Nextcloud → Settings → Security → App passwords.
 | `base_path` | `"/"` | Restrict agent to subtree (e.g. `"/Jarvis"`) |
 | `allow_write` | `true` | mkdir, write, rename, copy |
 | `allow_delete` | `false` | delete files and folders (recommended: keep false) |
-| `allow_share` | `true` | create/manage share links |
 | `readonly_mode` | `false` | override: block all writes |
-| `share_default_permissions` | `1` | 1=read-only, 31=full |
-| `share_default_expire_days` | `null` | auto-expire shares (days) |
 
 > **Safe defaults:** `allow_delete` is `false` by default — enable explicitly only when needed. Combine with a restricted `base_path` (e.g. `"/Jarvis"`) to limit the agent's scope.
+> **Share capability** is not included by default. See README for instructions on how to restore it if needed.
 
 ## Module usage
 
@@ -82,8 +79,7 @@ from scripts.nextcloud import NextcloudClient
 nc = NextcloudClient()
 nc.write_file("/Jarvis/notes.md", "# Notes\n...")
 nc.mkdir("/Jarvis/Articles")
-link = nc.create_share_link("/Jarvis/report.pdf")
-print(link["url"])
+items = nc.list_dir("/Jarvis")
 ```
 
 ## CLI reference
@@ -109,28 +105,12 @@ python3 scripts/nextcloud.py tags
 python3 scripts/nextcloud.py tag-create "research"
 python3 scripts/nextcloud.py tag-assign <file_id> <tag_id>
 
-# Sharing
-python3 scripts/nextcloud.py share /path                     # read-only public link
-python3 scripts/nextcloud.py share /path --permissions 31 --expire 2025-12-31
-python3 scripts/nextcloud.py share /path --password secret --no-download
-python3 scripts/nextcloud.py shares /path                    # list existing shares
-python3 scripts/nextcloud.py share-delete <share_id>
-
 # Account
 python3 scripts/nextcloud.py quota
 python3 scripts/nextcloud.py config
 ```
 
 ## Templates
-
-### Save a report and share it
-```python
-nc = NextcloudClient()
-nc.mkdir("/Reports/2025")
-nc.write_file("/Reports/2025/summary.md", report_content)
-link = nc.create_share_link("/Reports/2025/summary.md", permissions=1)
-# → return link["url"] to the user
-```
 
 ### Structured workspace setup
 ```bash
@@ -165,16 +145,13 @@ nc.assign_tag(file_id, tag_id)
 - Use `write_json` + `read_json` for persistent state between sessions
 - Auto-tag files by category (research / draft / published)
 
-## Share permissions
-`1`=Read · `2`=Update · `4`=Create · `8`=Delete · `16`=Share · `31`=All
-
 ## Combine with
 
 | Skill | Workflow |
 |-------|----------|
 | **ghost** | Write a post → save Markdown draft to NC → publish to Ghost |
-| **summarize** | Summarize a URL → save summary as `.md` to NC → create share link |
-| **gmail** | Receive an attachment → save to NC → share link back to sender |
+| **summarize** | Summarize a URL → save summary as `.md` to NC |
+| **gmail** | Receive an attachment → save to NC for archiving |
 | **obsidian** | Sync Obsidian vault notes to NC for remote backup |
 | **self-improving-agent** | Log agent learnings to NC for persistent, searchable history |
 

@@ -26,10 +26,7 @@ _DEFAULT_CONFIG = {
     "base_path": "/",
     "allow_write": True,
     "allow_delete": False,
-    "allow_share": True,
     "readonly_mode": False,
-    "share_default_permissions": 1,
-    "share_default_expire_days": None,
 }
 
 # ─── Config & credentials ──────────────────────────────────────────────────────
@@ -129,10 +126,6 @@ class NextcloudClient:
             raise PermissionDeniedError("readonly_mode is enabled in config.json")
         if not self.cfg.get("allow_delete", False):
             raise PermissionDeniedError("allow_delete is disabled in config.json")
-
-    def _check_share(self):
-        if not self.cfg.get("allow_share", True):
-            raise PermissionDeniedError("allow_share is disabled in config.json")
 
     # ── Directories ────────────────────────────────────────────────────────────
 
@@ -378,101 +371,6 @@ class NextcloudClient:
         r.raise_for_status()
         return r.json().get("ocs", {}).get("data", {})
 
-    # ── OCS: Sharing ───────────────────────────────────────────────────────────
-
-    def create_share_link(
-        self,
-        path: str,
-        permissions: int = None,
-        password: str = None,
-        expire_date: str = None,    # "YYYY-MM-DD"
-        label: str = None,
-        allow_download: bool = True,
-    ) -> dict:
-        """Create a public share link (OCS shareType=3)."""
-        self._check_share()
-        self._enforce_base(path)
-        if permissions is None:
-            permissions = self.cfg.get("share_default_permissions", 1)
-        if expire_date is None and self.cfg.get("share_default_expire_days"):
-            from datetime import date, timedelta
-            days = self.cfg["share_default_expire_days"]
-            expire_date = (date.today() + timedelta(days=days)).isoformat()
-        data = {
-            "path": path if path.startswith("/") else "/" + path,
-            "shareType": 3,
-            "permissions": permissions,
-        }
-        if password:    data["password"]    = password
-        if expire_date: data["expireDate"]  = expire_date
-        if label:       data["label"]       = label
-        if not allow_download:
-            data["attributes"] = json.dumps(
-                [{"scope": "permissions", "key": "download", "value": False}]
-            )
-        r = self._session.post(
-            f"{self.ocs_root}/apps/files_sharing/api/v1/shares", data=data
-        )
-        r.raise_for_status()
-        resp = r.json()
-        meta = resp.get("ocs", {}).get("meta", {})
-        if meta.get("statuscode") not in (100, 200):
-            raise NextcloudError(
-                f"OCS error {meta.get('statuscode')}: {meta.get('message')}"
-            )
-        d = resp["ocs"]["data"]
-        return {"share_id": d.get("id"), "token": d.get("token"),
-                "url": d.get("url"), "path": d.get("path"),
-                "permissions": d.get("permissions"), "expire_date": d.get("expiration")}
-
-    def create_user_share(self, path: str, share_with: str, permissions: int = 17) -> dict:
-        """Share a file/folder with another Nextcloud user."""
-        self._check_share()
-        self._enforce_base(path)
-        data = {
-            "path": path if path.startswith("/") else "/" + path,
-            "shareType": 0,
-            "shareWith": share_with,
-            "permissions": permissions,
-        }
-        r = self._session.post(
-            f"{self.ocs_root}/apps/files_sharing/api/v1/shares", data=data
-        )
-        r.raise_for_status()
-        d = r.json()["ocs"]["data"]
-        return {"share_id": d.get("id"), "share_with": d.get("share_with"),
-                "url": d.get("url"), "permissions": d.get("permissions")}
-
-    def get_shares(self, path: str = None) -> list:
-        """List shares, optionally filtered by path."""
-        params = {}
-        if path:
-            params["path"] = path if path.startswith("/") else "/" + path
-        r = self._session.get(
-            f"{self.ocs_root}/apps/files_sharing/api/v1/shares", params=params
-        )
-        r.raise_for_status()
-        return r.json().get("ocs", {}).get("data", [])
-
-    def update_share(self, share_id: int, **kwargs) -> bool:
-        """Update an existing share (permissions, password, expireDate, etc.)."""
-        self._check_share()
-        r = self._session.put(
-            f"{self.ocs_root}/apps/files_sharing/api/v1/shares/{share_id}",
-            data=kwargs,
-        )
-        r.raise_for_status()
-        return True
-
-    def delete_share(self, share_id: int) -> bool:
-        """Delete a share."""
-        self._check_share()
-        r = self._session.delete(
-            f"{self.ocs_root}/apps/files_sharing/api/v1/shares/{share_id}"
-        )
-        r.raise_for_status()
-        return True
-
     # ── OCS: Tags (systemtags) ─────────────────────────────────────────────────
 
     def get_tags(self) -> list:
@@ -601,17 +499,6 @@ def _cli():
 
     sp = _add("favorite",   "Set/unset favorite");  sp.add_argument("path"); sp.add_argument("--off", action="store_true")
 
-    sp = _add("share",  "Create a public share link")
-    sp.add_argument("path")
-    sp.add_argument("--permissions", type=int,  default=None)
-    sp.add_argument("--password",    default=None)
-    sp.add_argument("--expire",      default=None,  metavar="YYYY-MM-DD")
-    sp.add_argument("--label",       default=None)
-    sp.add_argument("--no-download", action="store_true")
-
-    sp = _add("shares",      "List shares");         sp.add_argument("path", nargs="?")
-    sp = _add("share-delete","Delete a share");      sp.add_argument("share_id", type=int)
-
     sp = _add("tags",         "List all system tags")
     sp = _add("tag-create",   "Create a system tag"); sp.add_argument("name")
     sp = _add("tag-assign",   "Assign tag to file");  sp.add_argument("file_id"); sp.add_argument("tag_id")
@@ -675,22 +562,6 @@ def _cli():
     elif args.cmd == "favorite":
         nc.set_favorite(args.path, state=not args.off)
         print(f"✓ favorite={'off' if args.off else 'on'} for {args.path}")
-
-    elif args.cmd == "share":
-        jout(nc.create_share_link(
-            args.path,
-            permissions=args.permissions,
-            password=args.password,
-            expire_date=args.expire,
-            label=args.label,
-            allow_download=not args.no_download,
-        ))
-
-    elif args.cmd == "shares":
-        jout(nc.get_shares(args.path))
-
-    elif args.cmd == "share-delete":
-        nc.delete_share(args.share_id); print(f"✓ share {args.share_id} deleted")
 
     elif args.cmd == "tags":
         jout(nc.get_tags())

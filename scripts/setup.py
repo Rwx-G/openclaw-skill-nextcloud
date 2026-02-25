@@ -33,10 +33,7 @@ _DEFAULT_CONFIG = {
     "base_path": "/",
     "allow_write": True,
     "allow_delete": False,
-    "allow_share": True,
     "readonly_mode": False,
-    "share_default_permissions": 1,
-    "share_default_expire_days": None,
 }
 
 
@@ -179,27 +176,6 @@ def main():
         hint="recommended: false unless you trust the agent fully",
     )
 
-    print("\n  ── Sharing ──")
-    cfg["allow_share"] = _ask_bool(
-        "Allow creating and managing share links?",
-        default=cfg.get("allow_share", True),
-        hint="public links, user shares",
-    )
-    if cfg["allow_share"]:
-        perms = _ask(
-            "Default share permission",
-            default=str(cfg.get("share_default_permissions", 1)),
-            # 1=Read  2=Update  4=Create  8=Delete  16=Share  31=All
-        )
-        print("    (1=Read-only  2=Update  4=Create  8=Delete  16=Share  31=All)")
-        cfg["share_default_permissions"] = int(perms) if perms.isdigit() else 1
-
-        expire = _ask(
-            "Auto-expire new shares after N days (leave empty = no expiry)",
-            default=str(cfg.get("share_default_expire_days") or ""),
-        )
-        cfg["share_default_expire_days"] = int(expire) if expire.isdigit() else None
-
     print("\n  ── Safety ──")
     cfg["readonly_mode"] = _ask_bool(
         "Enable readonly mode? (overrides all above — no writes at all)",
@@ -218,7 +194,6 @@ def main():
     print(f"  Scope     : {cfg['base_path']}")
     print(f"  Write     : {'✓' if cfg['allow_write']   and not cfg['readonly_mode'] else '✗'}")
     print(f"  Delete    : {'✓' if cfg['allow_delete']  and not cfg['readonly_mode'] else '✗'}")
-    print(f"  Share     : {'✓' if cfg['allow_share']   and not cfg['readonly_mode'] else '✗'}")
     print(f"  Readonly  : {'⚠ ON — all writes blocked' if cfg['readonly_mode'] else '✗ off'}")
     print()
     print("  Run init.py to validate that all permissions work:")

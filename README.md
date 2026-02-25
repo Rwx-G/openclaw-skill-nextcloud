@@ -1,12 +1,14 @@
 # ☁️ openclaw-skill-nextcloud
 
-> OpenClaw skill — Nextcloud file management and sharing via WebDAV + OCS API
+> OpenClaw skill — Nextcloud file management via WebDAV + OCS API
 
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](LICENSE)
 [![OpenClaw](https://img.shields.io/badge/OpenClaw-skill-blue)](https://openclaw.ai)
 [![ClawHub](https://img.shields.io/badge/ClawHub-nextcloud--files-green)](https://clawhub.ai/Romain-Grosos/nextcloud-files)
 
-Full Nextcloud client for OpenClaw agents. Covers file/folder management (WebDAV) and sharing, tags, favorites, and user info (OCS). Includes interactive setup wizard, connection + permission validation, and a behavior restriction system via `config.json`.
+Nextcloud client for OpenClaw agents. Covers file/folder management (WebDAV), tags, favorites, and user info (OCS). Includes interactive setup wizard, connection + permission validation, and a behavior restriction system via `config.json`.
+
+> **Share capability** is not included by default. This keeps the skill's security surface minimal — no public links can be created autonomously. See [Restoring share capability](#restoring-share-capability) if you need it.
 
 ## Install
 
@@ -40,7 +42,6 @@ You'll need a Nextcloud **App Password**: Settings → Security → App password
 | Files | create, read, write, rename, move, copy |
 | Folders | create, rename, move, copy |
 | Search | search by filename (DASL) |
-| Sharing | public links, user shares, permissions, expiry, password |
 | Tags | list, create, assign, remove (system tags) |
 | Favorites | toggle |
 | Account | quota, user info, server capabilities |
@@ -64,10 +65,7 @@ Behavior → `config.json` in skill directory:
   "base_path": "/Jarvis",
   "allow_write": true,
   "allow_delete": false,
-  "allow_share": true,
-  "readonly_mode": false,
-  "share_default_permissions": 1,
-  "share_default_expire_days": null
+  "readonly_mode": false
 }
 ```
 
@@ -86,6 +84,20 @@ Behavior → `config.json` in skill directory:
 - [SKILL.md](SKILL.md) — full skill instructions, CLI reference, templates
 - [references/api.md](references/api.md) — WebDAV + OCS endpoint reference
 - [references/troubleshooting.md](references/troubleshooting.md) — common errors and fixes
+
+## Restoring share capability
+
+Share functionality (public links, user shares) is intentionally excluded from the default build to minimize the skill's security surface and avoid false positives from security scanners.
+
+If you need it, open a GitHub issue or PR — or add it manually by implementing the following in `scripts/nextcloud.py`:
+
+- `_check_share()` guard method (reads `allow_share` from config)
+- `create_share_link()`, `create_user_share()`, `get_shares()`, `update_share()`, `delete_share()` using the OCS endpoint `{base_url}/ocs/v2.php/apps/files_sharing/api/v1/shares`
+- `allow_share`, `share_default_permissions`, `share_default_expire_days` keys in `_DEFAULT_CONFIG` and `config.json`
+
+All share methods call `self._check_share()` as first guard and `self._enforce_base(path)` for scope restriction.
+
+> When re-enabling share, set `allow_share=true` in `config.json` and keep `share_default_permissions=1` (read-only) as a safe default.
 
 ## License
 
