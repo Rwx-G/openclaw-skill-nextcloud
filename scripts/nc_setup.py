@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 """
-nc_setup.py — Initialize a folder structure in Nextcloud.
+nc_setup.py - Initialize a folder structure in Nextcloud.
 Part of the Nextcloud skill for OpenClaw.
 
 Usage:

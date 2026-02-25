@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 """
-nextcloud.py — Nextcloud client (WebDAV + OCS) for OpenClaw
+nextcloud.py - Nextcloud client (WebDAV + OCS) for OpenClaw
 Skill: nextcloud | https://clawhub.ai
 
 Config  : <skill_dir>/config.json
@@ -465,7 +465,7 @@ def _cli():
     import argparse
 
     p = argparse.ArgumentParser(
-        description="Nextcloud CLI — WebDAV + OCS",
+        description="Nextcloud CLI - WebDAV + OCS",
         formatter_class=argparse.RawDescriptionHelpFormatter,
         epilog="Credentials: ~/.openclaw/secrets/nextcloud_creds (NC_URL / NC_USER / NC_PASS)"
     )

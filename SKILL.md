@@ -1,6 +1,6 @@
 ---
 name: nextcloud
-description: "Nextcloud file and folder management via WebDAV + OCS API. Use when: (1) creating, reading, writing, renaming, moving, copying, or deleting files/folders, (2) listing or searching directory contents, (3) toggling favorites or managing system tags, (4) checking storage quota. NOT for: Nextcloud Talk, Calendar/Contacts (use CalDAV), app management (requires admin), large binary transfers, or creating share links (share capability not included by default — see README)."
+description: "Nextcloud file and folder management via WebDAV + OCS API. Use when: (1) creating, reading, writing, renaming, moving, copying, or deleting files/folders, (2) listing or searching directory contents, (3) toggling favorites or managing system tags, (4) checking storage quota. NOT for: Nextcloud Talk, Calendar/Contacts (use CalDAV), app management (requires admin), large binary transfers, or creating share links (share capability not included by default - see README)."
 homepage: https://github.com/rwx-g/openclaw-skill-nextcloud
 compatibility: Python 3.9+ · requests · network access to Nextcloud instance
 metadata:
@@ -50,9 +50,9 @@ python3 scripts/setup.py       # interactive: credentials + permissions + connec
 python3 scripts/init.py        # validate all configured permissions against live instance
 ```
 
-> init.py only runs write/delete tests when both `allow_write=true` and `allow_delete=true`. When `allow_delete=false`, write tests are skipped — no test artifacts are created or left behind.
+> init.py only runs write/delete tests when both `allow_write=true` and `allow_delete=true`. When `allow_delete=false`, write tests are skipped - no test artifacts are created or left behind.
 
-**Manual** — `~/.openclaw/secrets/nextcloud_creds` (chmod 600):
+**Manual** - `~/.openclaw/secrets/nextcloud_creds` (chmod 600):
 ```
 NC_URL=https://cloud.example.com
 NC_USER=username
@@ -60,7 +60,7 @@ NC_PASS=app-password
 ```
 App password: Nextcloud → Settings → Security → App passwords.
 
-**config.json** — behavior restrictions:
+**config.json** - behavior restrictions:
 
 | Key | Default | Effect |
 |-----|---------|--------|
@@ -69,7 +69,7 @@ App password: Nextcloud → Settings → Security → App passwords.
 | `allow_delete` | `false` | delete files and folders (recommended: keep false) |
 | `readonly_mode` | `false` | override: block all writes |
 
-> **Safe defaults:** `allow_delete` is `false` by default — enable explicitly only when needed. Combine with a restricted `base_path` (e.g. `"/Jarvis"`) to limit the agent's scope.
+> **Safe defaults:** `allow_delete` is `false` by default - enable explicitly only when needed. Combine with a restricted `base_path` (e.g. `"/Jarvis"`) to limit the agent's scope.
 > **Share capability** is not included by default. See README for instructions on how to restore it if needed.
 
 ## Module usage
@@ -139,7 +139,7 @@ nc.assign_tag(file_id, tag_id)
 ```
 
 ## Ideas
-- Sandbox the agent with `base_path: "/Jarvis"` — it can't touch anything else
+- Sandbox the agent with `base_path: "/Jarvis"` - it can't touch anything else
 - Store agent-produced Markdown files and auto-share a read-only link in the reply
 - Use `append_to_file` for rolling logs or changelogs
 - Use `write_json` + `read_json` for persistent state between sessions

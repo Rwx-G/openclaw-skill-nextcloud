@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 """
-setup.py — Interactive setup for the Nextcloud skill.
+setup.py - Interactive setup for the Nextcloud skill.
 Run this after installing the skill to configure credentials and behavior.
 
 Usage: python3 scripts/setup.py
@@ -10,7 +10,7 @@ import json
 import sys
 from pathlib import Path
 
-# No subprocess usage in this file — pip installs must be done manually.
+# No subprocess usage in this file - pip installs must be done manually.
 
 SKILL_DIR   = Path(__file__).resolve().parent.parent
 CONFIG_FILE = SKILL_DIR / "config.json"
@@ -110,11 +110,11 @@ def _test_connection(nc_url: str, nc_user: str, nc_pass: str) -> bool:
 
 def main():
     print("┌─────────────────────────────────────────┐")
-    print("│   Nextcloud Skill — Setup               │")
+    print("│   Nextcloud Skill - Setup               │")
     print("└─────────────────────────────────────────┘")
 
     # ── Step 1: Credentials ────────────────────────────────────────────────────
-    print("\n● Step 1/3 — Credentials\n")
+    print("\n● Step 1/3 - Credentials\n")
 
     existing = _load_existing_creds()
     nc_url = nc_user = nc_pass = ""
@@ -143,14 +143,14 @@ def main():
         else:
             print("✗ Failed")
             if not _ask_bool("  Save credentials anyway?", default=False):
-                print("  Aborted — no files written.")
+                print("  Aborted - no files written.")
                 sys.exit(1)
 
         _write_creds(nc_url, nc_user, nc_pass)
         print(f"  ✓ Saved to {CREDS_FILE}")
 
     # ── Step 2: Scope ──────────────────────────────────────────────────────────
-    print("\n● Step 2/3 — Scope\n")
+    print("\n● Step 2/3 - Scope\n")
     print("  Limit the agent to a specific subtree of your Nextcloud.")
     print("  Example: /Jarvis  →  agent can only act inside /Jarvis/\n")
 
@@ -161,7 +161,7 @@ def main():
     ) or "/"
 
     # ── Step 3: Permissions ────────────────────────────────────────────────────
-    print("\n● Step 3/3 — Permissions\n")
+    print("\n● Step 3/3 - Permissions\n")
     print("  Configure what operations the agent is allowed to perform.\n")
 
     print("  ── File & folder operations ──")
@@ -178,7 +178,7 @@ def main():
 
     print("\n  ── Safety ──")
     cfg["readonly_mode"] = _ask_bool(
-        "Enable readonly mode? (overrides all above — no writes at all)",
+        "Enable readonly mode? (overrides all above - no writes at all)",
         default=cfg.get("readonly_mode", False),
     )
 
@@ -194,7 +194,7 @@ def main():
     print(f"  Scope     : {cfg['base_path']}")
     print(f"  Write     : {'✓' if cfg['allow_write']   and not cfg['readonly_mode'] else '✗'}")
     print(f"  Delete    : {'✓' if cfg['allow_delete']  and not cfg['readonly_mode'] else '✗'}")
-    print(f"  Readonly  : {'⚠ ON — all writes blocked' if cfg['readonly_mode'] else '✗ off'}")
+    print(f"  Readonly  : {'⚠ ON - all writes blocked' if cfg['readonly_mode'] else '✗ off'}")
     print()
     print("  Run init.py to validate that all permissions work:")
     print("    python3 scripts/init.py")

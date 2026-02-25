@@ -4,18 +4,18 @@ Read this file when you need details on specific endpoints, error codes, or fiel
 not covered by the main SKILL.md.
 
 ## Table of Contents
-1. [WebDAV — Base URL & Auth](#1-webdav--base-url--auth)
+1. [WebDAV - Base URL & Auth](#1-webdav--base-url--auth)
 2. [WebDAV Methods](#2-webdav-methods)
-3. [OCS — Sharing API](#3-ocs--sharing-api)
-4. [OCS — User & Capabilities](#4-ocs--user--capabilities)
-5. [OCS — System Tags](#5-ocs--system-tags)
+3. [OCS - Sharing API](#3-ocs--sharing-api)
+4. [OCS - User & Capabilities](#4-ocs--user--capabilities)
+5. [OCS - System Tags](#5-ocs--system-tags)
 6. [Share Permissions Bitmask](#6-share-permissions-bitmask)
 7. [Error Codes](#7-error-codes)
 8. [PROPFIND Properties](#8-propfind-properties)
 
 ---
 
-## 1. WebDAV — Base URL & Auth
+## 1. WebDAV - Base URL & Auth
 
 ```
 Base URL : {NC_URL}/remote.php/dav/files/{username}/
@@ -33,14 +33,14 @@ All paths are relative to the user's root. Example:
 
 ## 2. WebDAV Methods
 
-### GET — Read file
+### GET - Read file
 ```
 GET /remote.php/dav/files/{user}/{path}
 Response: file content (binary or text)
 Status: 200 OK | 404 Not Found | 401 Unauthorized
 ```
 
-### PUT — Create or overwrite file
+### PUT - Create or overwrite file
 ```
 PUT /remote.php/dav/files/{user}/{path}
 Body: file content
@@ -48,20 +48,20 @@ Headers: Content-Type: text/plain (or appropriate MIME)
 Status: 201 Created | 204 No Content (overwrite) | 409 Conflict (parent missing)
 ```
 
-### MKCOL — Create directory
+### MKCOL - Create directory
 ```
 MKCOL /remote.php/dav/files/{user}/{path}
 Status: 201 Created | 405 Already Exists | 409 Parent missing
 ```
 
-### DELETE — Remove file or directory
+### DELETE - Remove file or directory
 ```
 DELETE /remote.php/dav/files/{user}/{path}
 Status: 204 No Content | 404 Not Found
 Note: Nextcloud moves to trash if trashbin app is enabled.
 ```
 
-### MOVE — Rename or move
+### MOVE - Rename or move
 ```
 MOVE /remote.php/dav/files/{user}/{old_path}
 Headers:
@@ -70,7 +70,7 @@ Headers:
 Status: 201 Created | 204 No Content | 412 Precondition Failed (Overwrite:F, target exists)
 ```
 
-### COPY — Duplicate
+### COPY - Duplicate
 ```
 COPY /remote.php/dav/files/{user}/{src}
 Headers:
@@ -80,7 +80,7 @@ Headers:
 Status: 201 Created | 204 No Content
 ```
 
-### PROPFIND — List directory / file metadata
+### PROPFIND - List directory / file metadata
 ```
 PROPFIND /remote.php/dav/files/{user}/{path}
 Headers: Depth: 0 (file only) | 1 (one level) | infinity (recursive, expensive)
@@ -88,7 +88,7 @@ Body: XML propfind request (see SKILL.md)
 Status: 207 Multi-Status
 ```
 
-### PROPPATCH — Set properties (favorites, etc.)
+### PROPPATCH - Set properties (favorites, etc.)
 ```
 PROPPATCH /remote.php/dav/files/{user}/{path}
 Body: XML propertyupdate
@@ -96,7 +96,7 @@ Body: XML propertyupdate
 Status: 207 Multi-Status
 ```
 
-### SEARCH — Search by filename (DASL)
+### SEARCH - Search by filename (DASL)
 ```
 SEARCH /remote.php/dav
 Body: XML basicsearch with <d:like> on <d:displayname>
@@ -104,7 +104,7 @@ Status: 207 Multi-Status
 Note: Full-text content search requires the Nextcloud Full Text Search app.
 ```
 
-### HEAD — Check existence
+### HEAD - Check existence
 ```
 HEAD /remote.php/dav/files/{user}/{path}
 Status: 200 OK (exists) | 404 Not Found
@@ -112,27 +112,27 @@ Status: 200 OK (exists) | 404 Not Found
 
 ---
 
-## 3. OCS — Sharing API
+## 3. OCS - Sharing API
 
 Base URL: `{NC_URL}/ocs/v2.php/apps/files_sharing/api/v1`
 Headers: `OCS-APIRequest: true`, `Accept: application/json`
 
-### POST /shares — Create share
+### POST /shares - Create share
 ```
 Body (form):
-  path        : string  — path to file/folder (required)
-  shareType   : int     — 0=user, 1=group, 3=public link, 4=email (required)
-  shareWith   : string  — user/group ID (required for types 0 and 1)
-  permissions : int     — bitmask (default: 17 for user shares, 1 for public links)
-  password    : string  — optional, public links only
-  expireDate  : string  — "YYYY-MM-DD", optional
-  label       : string  — optional display label
-  attributes  : string  — JSON array, e.g. [{"scope":"permissions","key":"download","value":false}]
+  path        : string  - path to file/folder (required)
+  shareType   : int     - 0=user, 1=group, 3=public link, 4=email (required)
+  shareWith   : string  - user/group ID (required for types 0 and 1)
+  permissions : int     - bitmask (default: 17 for user shares, 1 for public links)
+  password    : string  - optional, public links only
+  expireDate  : string  - "YYYY-MM-DD", optional
+  label       : string  - optional display label
+  attributes  : string  - JSON array, e.g. [{"scope":"permissions","key":"download","value":false}]
 Response: JSON with share data including id, token, url
 OCS status: 100 = success
 ```
 
-### GET /shares — List shares
+### GET /shares - List shares
 ```
 Params:
   path     : string (optional filter)
@@ -141,19 +141,19 @@ Params:
 Response: JSON array of share objects
 ```
 
-### PUT /shares/{id} — Update share
+### PUT /shares/{id} - Update share
 ```
 Body: same optional fields as POST
 ```
 
-### DELETE /shares/{id} — Delete share
+### DELETE /shares/{id} - Delete share
 ```
 Status: 100 OCS success
 ```
 
 ---
 
-## 4. OCS — User & Capabilities
+## 4. OCS - User & Capabilities
 
 ### GET /ocs/v2.php/cloud/user
 ```
@@ -168,29 +168,29 @@ Useful to detect: NC version, enabled apps, max file size, default share permiss
 
 ---
 
-## 5. OCS — System Tags
+## 5. OCS - System Tags
 
 Base URL: `{NC_URL}/remote.php/dav`
 
-### PROPFIND /systemtags/ — List tags
+### PROPFIND /systemtags/ - List tags
 ```
 Headers: Depth: 1
 Props: oc:id, oc:display-name, oc:user-visible, oc:user-assignable
 ```
 
-### POST /systemtags/ — Create tag
+### POST /systemtags/ - Create tag
 ```
 Body: JSON {"name": "tag-name", "userVisible": true, "userAssignable": true}
 Response: 201 Created, Location header contains tag ID
 ```
 
-### PUT /systemtags-relations/files/{fileId}/{tagId} — Assign tag
+### PUT /systemtags-relations/files/{fileId}/{tagId} - Assign tag
 ```
 Status: 201 Created | 409 Already assigned
 fileId: from oc:fileid property in PROPFIND response
 ```
 
-### DELETE /systemtags-relations/files/{fileId}/{tagId} — Remove tag
+### DELETE /systemtags-relations/files/{fileId}/{tagId} - Remove tag
 
 ---
 
@@ -206,10 +206,10 @@ fileId: from oc:fileid property in PROPFIND response
 | 31    | All (1+2+4+8+16) |
 
 **Common combos:**
-- `1` — Read-only public link (default for public shares)
-- `17` — Read + Share (default for user shares)
-- `7` — Read + Update + Create (collaborative folder, no delete)
-- `31` — Full access
+- `1` - Read-only public link (default for public shares)
+- `17` - Read + Share (default for user shares)
+- `7` - Read + Update + Create (collaborative folder, no delete)
+- `31` - Full access
 
 ---
 
@@ -222,14 +222,14 @@ fileId: from oc:fileid property in PROPFIND response
 | 201 | Created |
 | 204 | No Content (success, no body) |
 | 207 | Multi-Status (PROPFIND/SEARCH responses) |
-| 401 | Unauthorized — check credentials |
-| 403 | Forbidden — insufficient permissions |
+| 401 | Unauthorized - check credentials |
+| 403 | Forbidden - insufficient permissions |
 | 404 | Not Found |
 | 405 | Method Not Allowed (MKCOL on existing path) |
-| 409 | Conflict — parent directory doesn't exist |
-| 412 | Precondition Failed — e.g. MOVE with Overwrite:F and target exists |
+| 409 | Conflict - parent directory doesn't exist |
+| 412 | Precondition Failed - e.g. MOVE with Overwrite:F and target exists |
 | 423 | Locked |
-| 507 | Insufficient Storage — quota exceeded |
+| 507 | Insufficient Storage - quota exceeded |
 
 ### OCS status codes
 | Code | Meaning |
@@ -262,4 +262,4 @@ Namespaces:
 | `oc:favorite` | oc | 1=favorited, 0=not |
 | `oc:share-types` | oc | Array of active share types |
 | `oc:owner-id` | oc | Owner's user ID |
-| `nc:has-preview` | nc | true/false — preview thumbnail available |
+| `nc:has-preview` | nc | true/false - preview thumbnail available |

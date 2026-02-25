@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 """
-init.py — Validate the Nextcloud skill configuration.
+init.py - Validate the Nextcloud skill configuration.
 Tests the connection and each configured permission against the real instance.
 
 Write tests (mkdir/write/delete) are only run when both allow_write=true AND
@@ -66,7 +66,7 @@ def _prefixed(path: str, base: str) -> str:
 
 def main():
     print("┌─────────────────────────────────────────┐")
-    print("│   Nextcloud Skill — Init Check          │")
+    print("│   Nextcloud Skill - Init Check          │")
     print("└─────────────────────────────────────────┘")
 
     # ── Pre-flight ─────────────────────────────────────────────────────────────
@@ -141,8 +141,8 @@ def main():
 
     elif not allow_delete:
         # Cannot guarantee cleanup → skip all write tests to avoid orphan artifacts.
-        r.skip("Write (mkdir)",   "allow_delete=false (write test skipped — no cleanup possible)")
-        r.skip("Write (file)",    "allow_delete=false (write test skipped — no cleanup possible)")
+        r.skip("Write (mkdir)",   "allow_delete=false (write test skipped - no cleanup possible)")
+        r.skip("Write (file)",    "allow_delete=false (write test skipped - no cleanup possible)")
         r.skip("Read (file)",     "allow_delete=false")
         r.skip("Delete (file)",   "allow_delete=false")
         r.skip("Delete (folder)", "allow_delete=false")
@@ -150,7 +150,7 @@ def main():
         print(f"     are left on the instance. Write access will be confirmed on first use.")
 
     else:
-        # allow_write=true AND allow_delete=true — safe to create and clean up.
+        # allow_write=true AND allow_delete=true - safe to create and clean up.
 
         # mkdir
         try:

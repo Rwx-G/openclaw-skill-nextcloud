@@ -1,6 +1,6 @@
 # ☁️ openclaw-skill-nextcloud
 
-> OpenClaw skill — Nextcloud file management via WebDAV + OCS API
+> OpenClaw skill - Nextcloud file management via WebDAV + OCS API
 
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](LICENSE)
 [![OpenClaw](https://img.shields.io/badge/OpenClaw-skill-blue)](https://openclaw.ai)
@@ -8,7 +8,7 @@
 
 Nextcloud client for OpenClaw agents. Covers file/folder management (WebDAV), tags, favorites, and user info (OCS). Includes interactive setup wizard, connection + permission validation, and a behavior restriction system via `config.json`.
 
-> **Share capability** is not included by default. This keeps the skill's security surface minimal — no public links can be created autonomously. See [Restoring share capability](#restoring-share-capability) if you need it.
+> **Share capability** is not included by default. This keeps the skill's security surface minimal - no public links can be created autonomously. See [Restoring share capability](#restoring-share-capability) if you need it.
 
 ## Install
 
@@ -33,7 +33,7 @@ python3 scripts/init.py        # validate all configured permissions
 
 You'll need a Nextcloud **App Password**: Settings → Security → App passwords.
 
-> init.py only runs write/delete tests when both `allow_write=true` and `allow_delete=true`. When `allow_delete=false`, write tests are skipped — no artifacts are created and none can be left on your instance.
+> init.py only runs write/delete tests when both `allow_write=true` and `allow_delete=true`. When `allow_delete=false`, write tests are skipped - no artifacts are created and none can be left on your instance.
 
 ## What it can do
 
@@ -74,22 +74,22 @@ Behavior → `config.json` in skill directory:
 ## Requirements
 
 - Python 3.9+
-- `requests` — install with `pip install requests` before running setup.py
+- `requests` - install with `pip install requests` before running setup.py
 - Network access to Nextcloud instance
 
 > **Note:** setup.py does not run `pip` automatically. Install dependencies manually before setup.
 
 ## Documentation
 
-- [SKILL.md](SKILL.md) — full skill instructions, CLI reference, templates
-- [references/api.md](references/api.md) — WebDAV + OCS endpoint reference
-- [references/troubleshooting.md](references/troubleshooting.md) — common errors and fixes
+- [SKILL.md](SKILL.md) - full skill instructions, CLI reference, templates
+- [references/api.md](references/api.md) - WebDAV + OCS endpoint reference
+- [references/troubleshooting.md](references/troubleshooting.md) - common errors and fixes
 
 ## Restoring share capability
 
 Share functionality (public links, user shares) is intentionally excluded from the default build to minimize the skill's security surface and avoid false positives from security scanners.
 
-If you need it, open a GitHub issue or PR — or add it manually by implementing the following in `scripts/nextcloud.py`:
+If you need it, open a GitHub issue or PR - or add it manually by implementing the following in `scripts/nextcloud.py`:
 
 - `_check_share()` guard method (reads `allow_share` from config)
 - `create_share_link()`, `create_user_share()`, `get_shares()`, `update_share()`, `delete_share()` using the OCS endpoint `{base_url}/ocs/v2.php/apps/files_sharing/api/v1/shares`
