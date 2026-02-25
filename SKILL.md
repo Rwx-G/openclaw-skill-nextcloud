@@ -82,10 +82,9 @@ The skill reads and writes the following paths. All usage is intentional and doc
 
 Credentials can also be provided via environment variables (`NC_URL`, `NC_USER`, `NC_APP_KEY`) instead of the creds file. The skill checks env vars first.
 
-**Cleanup on uninstall:** `clawhub uninstall nextcloud-files` removes the skill directory but leaves config and credentials in place. Clean manually if needed:
+**Cleanup on uninstall:** `clawhub uninstall nextcloud-files` removes the skill directory. To also remove credentials and config:
 ```bash
-rm -rf ~/.openclaw/config/nextcloud
-rm ~/.openclaw/secrets/nextcloud_creds
+python3 scripts/setup.py --cleanup
 ```
 On reinstall, any existing config at `~/.openclaw/config/nextcloud/config.json` is picked up automatically.
 

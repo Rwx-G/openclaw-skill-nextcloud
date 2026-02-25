@@ -196,5 +196,28 @@ def main():
     print()
 
 
+def cleanup():
+    """Remove all persistent files written by this skill (credentials + config)."""
+    print("Removing Nextcloud skill persistent files...")
+    removed = []
+    for path in [CREDS_FILE, CONFIG_FILE]:
+        if path.exists():
+            path.unlink()
+            removed.append(str(path))
+    try:
+        _CONFIG_DIR.rmdir()
+    except OSError:
+        pass
+    if removed:
+        for p in removed:
+            print(f"  Removed: {p}")
+        print("Done. Re-run setup.py to reconfigure.")
+    else:
+        print("  Nothing to remove.")
+
+
 if __name__ == "__main__":
-    main()
+    if "--cleanup" in sys.argv:
+        cleanup()
+    else:
+        main()
