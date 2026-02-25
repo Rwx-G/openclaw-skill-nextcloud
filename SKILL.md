@@ -65,12 +65,23 @@ App password: Nextcloud → Settings → Security → App passwords.
 | Key | Default | Effect |
 |-----|---------|--------|
 | `base_path` | `"/"` | Restrict agent to subtree (e.g. `"/Jarvis"`) |
-| `allow_write` | `true` | mkdir, write, rename, copy |
-| `allow_delete` | `false` | delete files and folders (recommended: keep false) |
-| `readonly_mode` | `false` | override: block all writes |
+| `allow_write` | `false` | mkdir, write, rename, copy (enable explicitly) |
+| `allow_delete` | `false` | delete files and folders (enable explicitly) |
+| `readonly_mode` | `false` | override: block all writes regardless of above |
 
-> **Safe defaults:** `allow_delete` is `false` by default - enable explicitly only when needed. Combine with a restricted `base_path` (e.g. `"/Jarvis"`) to limit the agent's scope.
+> **Safe defaults:** both `allow_write` and `allow_delete` are `false` by default. Enable each explicitly only when needed. Combine with a restricted `base_path` (e.g. `"/Jarvis"`) to limit the agent's scope.
 > **Share capability** is not included by default. See README for instructions on how to restore it if needed.
+
+## Storage & credentials
+
+The skill reads and writes the following paths. All usage is intentional and documented:
+
+| Path | Written by | Purpose |
+|------|-----------|---------|
+| `~/.openclaw/secrets/nextcloud_creds` | `setup.py` | Nextcloud credentials (NC_URL, NC_USER, NC_PASS). chmod 600. Never committed. |
+| `<skill_dir>/config.json` | `setup.py` | Behavior restrictions (base_path, allow_write, allow_delete, readonly_mode). No secrets. |
+
+Credentials can also be provided via environment variables (`NC_URL`, `NC_USER`, `NC_PASS`) instead of the creds file. The skill checks env vars first.
 
 ## Module usage
 

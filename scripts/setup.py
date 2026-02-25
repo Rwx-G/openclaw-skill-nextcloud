@@ -31,7 +31,7 @@ _ensure_requests()
 
 _DEFAULT_CONFIG = {
     "base_path": "/",
-    "allow_write": True,
+    "allow_write": False,
     "allow_delete": False,
     "readonly_mode": False,
 }
@@ -167,7 +167,7 @@ def main():
     print("  ── File & folder operations ──")
     cfg["allow_write"] = _ask_bool(
         "Allow creating and modifying files/folders?",
-        default=cfg.get("allow_write", True),
+        default=cfg.get("allow_write", False),
         hint="mkdir, write, rename, copy",
     )
     cfg["allow_delete"] = _ask_bool(

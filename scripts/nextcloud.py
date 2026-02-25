@@ -24,7 +24,7 @@ CREDS_FILE  = Path.home() / ".openclaw" / "secrets" / "nextcloud_creds"
 
 _DEFAULT_CONFIG = {
     "base_path": "/",
-    "allow_write": True,
+    "allow_write": False,
     "allow_delete": False,
     "readonly_mode": False,
 }
