@@ -525,6 +525,8 @@ def _cli():
     sp.add_argument("path")
     sp.add_argument("--content", "-c", default=None)
     sp.add_argument("--file",    "-f", default=None)
+    sp.add_argument("--append",  "-a", action="store_true",
+                    help="Append to existing file instead of overwriting")
 
     sp = _add("read",   "Print a file");                     sp.add_argument("path")
 
@@ -580,8 +582,12 @@ def _cli():
             content = args.content
         else:
             content = sys.stdin.read()
-        nc.write_file(args.path, content)
-        jout({"ok": True, "action": "write", "path": args.path, "bytes": len(content.encode())})
+        if args.append:
+            nc.append_to_file(args.path, content)
+            jout({"ok": True, "action": "append", "path": args.path, "bytes": len(content.encode())})
+        else:
+            nc.write_file(args.path, content)
+            jout({"ok": True, "action": "write", "path": args.path, "bytes": len(content.encode())})
 
     elif args.cmd == "read":
         print(nc.read_file(args.path))

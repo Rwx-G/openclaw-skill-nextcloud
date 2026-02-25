@@ -38,7 +38,7 @@ You'll need a Nextcloud **App Password**: Settings → Security → App password
 
 | Category | Operations |
 |----------|-----------|
-| Files | create, read, write, rename, move, copy |
+| Files | create, read, write, append, rename, move, copy |
 | Folders | create, rename, move, copy |
 | Search | search by filename (DASL) |
 | Tags | list, create, assign, remove (system tags) |

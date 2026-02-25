@@ -105,6 +105,7 @@ items = nc.list_dir("/Jarvis")
 python3 scripts/nextcloud.py mkdir /path/folder
 python3 scripts/nextcloud.py write /path/file.md --content "# Title"
 python3 scripts/nextcloud.py write /path/file.md --file local.md
+python3 scripts/nextcloud.py write /path/file.md --content "new entry" --append
 python3 scripts/nextcloud.py read  /path/file.md
 python3 scripts/nextcloud.py rename /old /new
 python3 scripts/nextcloud.py copy   /src /dst
