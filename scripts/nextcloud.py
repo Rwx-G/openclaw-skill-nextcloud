@@ -12,11 +12,13 @@ Secrets : ~/.openclaw/secrets/nextcloud_creds  (NC_URL, NC_USER, NC_APP_KEY)
 import base64
 import json
 import os
+import posixpath
 import sys
 import urllib.error
 import urllib.parse
 import urllib.request
 import xml.etree.ElementTree as ET
+from html import escape as _xml_escape
 from pathlib import Path
 from urllib.parse import quote
 
@@ -148,12 +150,13 @@ class NextcloudClient:
         return self.dav_root + enc
 
     def _enforce_base(self, path: str) -> str:
-        """Ensure path stays inside config base_path."""
+        """Ensure path stays inside config base_path after normalization."""
         base = self.cfg.get("base_path", "/").rstrip("/")
         if not base or base == "/":
             return path
         p = path if path.startswith("/") else "/" + path
-        if not p.startswith(base):
+        normalized = posixpath.normpath(p)
+        if normalized != base and not normalized.startswith(base + "/"):
             raise PermissionDeniedError(
                 f"Path '{path}' is outside allowed base_path '{base}'"
             )
@@ -190,6 +193,7 @@ class NextcloudClient:
         """Rename or move a resource (MOVE)."""
         self._check_write()
         self._enforce_base(old_path)
+        self._enforce_base(new_path)
         dst_url = self._dav(new_path)
         self._request_ok(
             "MOVE", self._dav(old_path),
@@ -202,6 +206,7 @@ class NextcloudClient:
         """Copy a resource to a new location (COPY)."""
         self._check_write()
         self._enforce_base(src_path)
+        self._enforce_base(dst_path)
         dst_url = self._dav(dst_path)
         self._request_ok(
             "COPY", self._dav(src_path),
@@ -259,6 +264,7 @@ class NextcloudClient:
 
     def set_favorite(self, path: str, state: bool = True) -> bool:
         """Toggle favorite flag via PROPPATCH (oc:favorite)."""
+        self._check_write()
         self._enforce_base(path)
         value = "1" if state else "0"
         body = f'''<?xml version="1.0"?>
@@ -356,7 +362,8 @@ class NextcloudClient:
         Full-text search via WebDAV SEARCH (DASL basic-search).
         Returns same dict format as list_dir.
         """
-        scope_url = self._dav(path)
+        scope_url = _xml_escape(self._dav(path))
+        safe_query = _xml_escape(query)
         body = f'''<?xml version="1.0" encoding="UTF-8"?>
 <d:searchrequest xmlns:d="DAV:" xmlns:oc="http://owncloud.org/ns">
   <d:basicsearch>
@@ -381,10 +388,10 @@ class NextcloudClient:
     <d:where>
       <d:like>
         <d:prop><d:displayname/></d:prop>
-        <d:literal>%{query}%</d:literal>
+        <d:literal>%{safe_query}%</d:literal>
       </d:like>
     </d:where>
-    <d:limit><d:nresults>{limit}</d:nresults></d:limit>
+    <d:limit><d:nresults>{int(limit)}</d:nresults></d:limit>
   </d:basicsearch>
 </d:searchrequest>'''
         _, _, resp_body = self._request_ok(
